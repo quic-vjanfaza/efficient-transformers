@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------------------
 #
-# Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+# Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # -----------------------------------------------------------------------------
@@ -107,7 +107,10 @@ def CtxGatherCB(
     # Expanded shape to create indices
     zero = ops.Constant(value_ints=[0])
     one = ops.Constant(value_ints=[1])
-    exp_shape = ops.Concat(batch_size, num_heads, ctx_len, one, axis=0)
+    # exp_shape = ops.Concat(batch_size, num_heads, ctx_len, one, axis=0)
+    exp_shape = ops.Concat(
+        ops.Reshape(batch_size, [1]), ops.Reshape(num_heads, [1]), ops.Reshape(ctx_len, [1]), one, axis=0
+    )
 
     # Create indices
     batch_idx = ops.Expand(ops.Unsqueeze(batch_index, [2, 3]), exp_shape)

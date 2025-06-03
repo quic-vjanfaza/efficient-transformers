@@ -28,7 +28,7 @@ model.compile(
     ctx_len=1024,
     num_cores=16,
     num_devices=1,
-    full_batch_size=4,
+    full_batch_size=1,
     mxfp6_matmul=True,
     mxint8_kv_cache=True,
 )
