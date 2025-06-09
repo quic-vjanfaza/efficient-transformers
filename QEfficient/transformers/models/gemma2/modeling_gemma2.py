@@ -171,7 +171,8 @@ class QEffGemma2Attention(Gemma2Attention):
         query_states, key_states = qeff_apply_rotary_pos_emb(query_states, key_states, cos, sin, position_ids)
 
         if past_key_value is not None:
-            attention_mask = attention_mask[:, :, :, : comp_ctx_lengths.shape[-1]]
+            if comp_ctx_lengths is not None:
+                attention_mask = attention_mask[:, :, :, : comp_ctx_lengths.shape[-1]]
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
             cache_kwargs = {
                 "sin": sin,
@@ -382,7 +383,7 @@ class QEffGemma2Model(Gemma2Model):
         if return_legacy_cache:
             past_key_values = past_key_values.to_legacy_cache()
 
-        comp_ctx_len_out = comp_ctx_lengths[comp_ctx_lengths.shape[-1] - 1 :]
+        comp_ctx_len_out = comp_ctx_lengths[comp_ctx_lengths.shape[-1] - 1 :] if comp_ctx_lengths is not None else None
         output = QEffBaseModelOutputWithPast(
             last_hidden_state=hidden_states,
             past_key_values=past_key_values if use_cache else None,
@@ -451,7 +452,7 @@ class QEffGemma2ForCausalLM(Gemma2ForCausalLM, GenerationMixin):
             logits = torch.tanh(logits)
             logits = logits * self.config.final_logit_softcapping
 
-        comp_ctx_len_out = comp_ctx_lengths[comp_ctx_lengths.shape[-1] - 1 :]
+        comp_ctx_len_out = comp_ctx_lengths[comp_ctx_lengths.shape[-1] - 1 :] if comp_ctx_lengths is not None else None
         return QEffCausalLMOutputWithPast(
             loss=None,
             logits=logits,
